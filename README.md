@@ -1,8 +1,11 @@
 # Chat Application
 
 ## Preview:
-![Frontpage](https://github.com/SlowMoschen/Chat.IO/blob/main/images/frontpage.PNG)
-![Chatpage](https://github.com/SlowMoschen/Chat.IO/blob/main/images/chat.PNG)
+<p align="center">
+  <img src="https://github.com/SlowMoschen/Chat.IO/blob/main/images/frontpage.PNG" alt="Frontpage" width="45%">
+  <img src="https://github.com/SlowMoschen/Chat.IO/blob/main/images/chat.PNG" alt="Chatpage" width="45%">
+</p>
+
 
 ## Tech Stack:
 
