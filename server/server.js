@@ -95,7 +95,7 @@ function whileConnected(socket)
 
 }
 
-// Helper function to get a Username via the socketID
+// Helper functions
 function getUsername(socket)
 {
     let output
@@ -110,7 +110,17 @@ function getUsername(socket)
     return output
 }
 
-// Helper functions
+function getCurrentRoom(socket)
+{
+    for(const [room, users] of currentConnections.entries())
+    {
+        if(users.has(socket.id))
+        {
+            return room
+        }
+    }
+}
+
 function updateUsersInRoom(room) {
     io.to(room).emit('update-connections', Array.from(currentConnections.get(room).entries()))
 }
