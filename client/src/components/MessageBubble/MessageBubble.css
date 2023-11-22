@@ -1,0 +1,48 @@
+.message-bubble {
+    list-style-type: none;
+    max-width: 300px;
+    min-width: 250px;
+    word-wrap: break-word;
+    padding: .5rem 1rem;
+    margin: .5rem 1rem;
+}
+
+.sent-bubble {
+    background-color: #ffffff;
+    align-self: flex-end;
+    border-radius: 20px 20px 0px 20px ;
+}
+
+.recieved-bubble {
+    background-color: #4681b4;
+    align-self: flex-start;
+    border-radius: 20px 20px 20px 0px ;
+    color: #ffffff;
+}
+
+.user-state-bubble {
+    color: black;
+    align-self: center;
+    text-align: center;
+    text-transform: capitalize;
+    background-color: rgba(70, 129, 180, 0.4);
+    height: 1.3rem;
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    opacity: .8;
+}
+
+.sender {
+    font-size: 18px;
+    text-transform: capitalize;
+    margin: .2rem 0;
+}
+
+.time {
+    display: flex;
+    justify-content: end;
+    font-size: 12px;
+}

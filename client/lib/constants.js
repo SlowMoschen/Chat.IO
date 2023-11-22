@@ -1,0 +1,1 @@
+export const errorDuration = 3000
