@@ -68,10 +68,13 @@ export default function Chat({ username, room }) {
                 <div className="h-[3%] flex items-center justify-center w-full">
                     <form onSubmit={(e) => handleSubmit(e)} className="flex w-full px-2">
                         <div className="w-[90%]">
-                            <Input placeholder={'Message'} name={'message'} id={'message'} onChange={(e) => setMessage(e.target.value)} type={'text'}/>
+                            <Input placeholder={'Message'} name={'message'} id={'message'} onChange={(e) => setMessage(e.target.value)} type={'text'} autoComplete={'off'}/>
                         </div>
                         <div className="w-[10%] flex items-center justify-center">
-                            <Button className={`ml-2 h-10 w-16 md:w-20 xl:w-32 rounded-md bg-primary outline-accent text-clear-white flex items-center justify-center ${message ? 'cursor-pointer' : 'cursor-not-allowed'}`} disabled={message ? false : true}>
+                            <Button 
+                            className={`ml-2 h-10 w-16 md:w-20 xl:w-32 rounded-md bg-primary outline-accent text-clear-white flex items-center justify-center ${message ? 'cursor-pointer' : 'cursor-not-allowed'}`} 
+                            disabled={message ? false : true}
+                            >
                             <span className="material-symbols-outlined">send</span>
                             </Button>
                         </div>
