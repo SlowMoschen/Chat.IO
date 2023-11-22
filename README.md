@@ -1,5 +1,9 @@
 # Chat Application
 
+## Preview:
+![Frontpage](https://github.com/SlowMoschen/Chat.IO/blob/main/images/frontpage.PNG)
+![Chatpage](https://github.com/SlowMoschen/Chat.IO/blob/main/images/chat.PNG)
+
 ## Tech Stack:
 
 - React
