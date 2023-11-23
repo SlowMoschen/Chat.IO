@@ -54,7 +54,7 @@ function whileConnected(socket)
 {
     console.log(`${socket.id} connected`)
 
-    // Event for joining a new Chat room
+    // Event for joining the first selected Room
     socket.on('join-room', (roomName, username) =>{
         socket.join(roomName)
 
@@ -69,6 +69,26 @@ function whileConnected(socket)
         sendUserState(roomName, username, '!user-joined!')
         updateUsersInRoom(roomName)
     })
+
+    //Event for joining a new Room
+    socket.on('join-new-room', (newRoom) => {
+        const username = getUsername(socket)
+        const currentRoom = getCurrentRoom(username)
+        if(currentRoom !== newRoom)
+        {
+
+            if(!currentConnections.has(newRoom))
+            {
+                currentConnections.set(newRoom, new Map())
+            }
+            currentConnections.get(newRoom).set(username, socket.id)
+            socket.join(newRoom)
+            deleteUser(username, currentRoom)
+            sendUserState(newRoom, username, '!user-joined!')
+            updateUsersInRoom(newRoom)
+            console.log(`User ${username} joined room: ${newRoom}`);
+        }
+    })
     
     socket.on('send-message', (data) => {
         const { room, message, sendTime } = data
@@ -80,17 +100,7 @@ function whileConnected(socket)
     socket.on('disconnect', () => {
         console.log(`${socket.id} disconnected`)
         const username = getUsername(socket)
-       
-        // Delete User from currentConnections and broadcast to other users
-        for(const [room, users] of currentConnections.entries())
-        {
-            if(users.has(username))
-            {
-                sendUserState(room, username, '!user-disconnected!')
-                users.delete(username)
-                updateUsersInRoom(room)
-            }
-        }        
+        deleteUser(username)
     })
 
 }
@@ -110,18 +120,43 @@ function getUsername(socket)
     return output
 }
 
-function getCurrentRoom(socket)
+function getCurrentRoom(username)
 {
     for(const [room, users] of currentConnections.entries())
     {
-        if(users.has(socket.id))
+        if(users.has(username))
         {
             return room
         }
     }
 }
 
+// Delete User from currentConnections and broadcast to other users
+function deleteUser(username, currentRoom)
+{
+    if(currentRoom)
+    {
+        currentConnections.get(currentRoom).delete(username)
+        sendUserState(currentRoom, username, '!user-disconnected!')
+        updateUsersInRoom(currentRoom)
+    }
+    else 
+    {
+
+        for(const [room, users] of currentConnections.entries())
+        {
+            if(users.has(username))
+            {
+                sendUserState(room, username, '!user-disconnected!')
+                users.delete(username)
+                updateUsersInRoom(room)
+            }
+        }        
+    }
+}
+
 function updateUsersInRoom(room) {
+    console.log(Array.from(currentConnections.get(room).entries()));
     io.to(room).emit('update-connections', Array.from(currentConnections.get(room).entries()))
 }
 

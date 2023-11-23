@@ -4,34 +4,55 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import { renderMessages } from "../utils/renderMessages";
 import { getCurrentTime } from "../../lib/TimeFunctions";
+import { errorDuration } from "../../lib/constants";
 import ChatMenu from "../components/ChatMenu/ChatMenu";
+import useError from "../hooks/useError";
 
-export default function Chat({ username, room }) {
+export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
     const socket = useSocket('http://localhost:3001')
+    const [ newRoom, setNewRoom ] = useState('')
     const [ currentConnections, setCurrentConnections ] = useState([])
     const [ message, setMessage ] = useState('')
     const [ receivedMessages, setReceivedMessages ] = useState([])
     const [ isMenuActive, setIsMenuActive ] = useState(false)
     const [ isRoomMenuActive, setIsRoomMenuActive ] = useState(false)
+    const [ error, setError ] = useState(null)
+    const errorMessage = useError(error)
     const messageContainerRef = useRef()
     const shouldScrollRef = useRef(true)
     
     const sendMessage = () => {
-        socket.emit('send-message', { room: room, message, sendTime: getCurrentTime() })
+        socket.emit('send-message', { room: currentRoom, message, sendTime: getCurrentTime() })
         setMessage('')
     }
 
-    const handleSubmit = e => {
+
+    const handleMessageSubmit = e => {
         e.preventDefault()
         sendMessage()
         e.target.elements.message.value = ''
     }
+
+    const handleRoomSubmit = e => {
+        e.preventDefault()
+        if(newRoom === currentRoom) 
+        {
+            setError('equal')
+            e.target.elements.newroom.value = ''
+            return
+        }
+        socket.emit('join-new-room', newRoom)
+        setCurrentRoom(newRoom)
+    }
     
+    //Function to evaluate if user scrolled to the bottom of MessageContainer
     const handleScroll = () => {
         shouldScrollRef.current = messageContainerRef.current.scrollTop === messageContainerRef.current.scrollHeight - messageContainerRef.current.clientHeight
     }
     
+
+    //useEffects to fire before render
     useEffect(() => {
         if(socket)
         {
@@ -39,7 +60,7 @@ export default function Chat({ username, room }) {
                 setCurrentConnections(connections.map(([username, userID]) => ({ username: username, id: userID })))
             })
             
-            socket.emit('join-room', room, username)
+            socket.emit('join-room', currentRoom, username)
             
             socket.on('received-message', (data) => {
                 const { username, message, sendTime } = data
@@ -56,6 +77,12 @@ export default function Chat({ username, room }) {
         }
     }, [receivedMessages])
 
+    useEffect(() => {
+        setTimeout(() => {
+            setError(null)
+        }, errorDuration);
+    }, [error])
+
     return (
         <>
             <div className="h-[98%] lg:w-[50%] lg:border lg:my-2 rounded-md">
@@ -70,7 +97,7 @@ export default function Chat({ username, room }) {
                             </Button>
                         </div>
                         <div>
-                            <h1 className="text-3xl">Room: <span className="capitalize">{room}</span></h1>
+                            <h1 className="text-3xl">Room: <span className="capitalize">{currentRoom}</span></h1>
                             <p className="text-xl">Currently Online: <span className="font-bold text-xl">{currentConnections.length}</span></p>
                         </div>
                     </div>
@@ -80,6 +107,9 @@ export default function Chat({ username, room }) {
                     setIsMenuActive={setIsMenuActive}
                     isRoomMenuActive={isRoomMenuActive}
                     setIsRoomMenuActive={setIsRoomMenuActive}
+                    setNewRoom={setNewRoom}
+                    onSubmit={(e) => handleRoomSubmit(e)}
+                    errorMessage={errorMessage}
                     />
                     <div className="h-[85%]">
                         <ul className="messages-display h-full flex flex-col overflow-y-scroll max-h-[100%]" ref={messageContainerRef} onScroll={() => handleScroll()}>
@@ -92,7 +122,7 @@ export default function Chat({ username, room }) {
                         </ul>
                     </div>
                     <div className="h-[3%] flex items-center justify-center w-full">
-                        <form onSubmit={(e) => handleSubmit(e)} className="flex w-full px-2">
+                        <form onSubmit={(e) => handleMessageSubmit(e)} className="flex w-full px-2">
                             <div className="w-[90%]">
                                 <Input placeholder={'Message'} name={'message'} id={'message'} onChange={(e) => setMessage(e.target.value)} type={'text'} autoComplete={'off'}/>
                             </div>

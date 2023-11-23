@@ -15,6 +15,9 @@ const useError = (error) => {
                 case 'taken':
                     setErrorMessage('Username already taken')
                     break
+                case 'equal':
+                    setErrorMessage('Already joined')
+                    break
                 default:
                     setErrorMessage('An error occurred')
             }

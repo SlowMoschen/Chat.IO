@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import RoomMenu from "../RoomMenu/RoomMenu";
 
 
-export default function ChatMenu({ setIsMenuActive, isMenuActive, className, isRoomMenuActive, setIsRoomMenuActive }) {
+export default function ChatMenu({ setIsMenuActive, isMenuActive, className, isRoomMenuActive, setIsRoomMenuActive, setNewRoom, onSubmit, errorMessage }) {
 
     const redirect = useNavigate()
 
@@ -16,7 +16,7 @@ export default function ChatMenu({ setIsMenuActive, isMenuActive, className, isR
         <div className={`${className} ${isMenuActive ? 'flex' : 'hidden'}`}>
             {
                 isRoomMenuActive
-                ? <RoomMenu isRoomMenuActive={isRoomMenuActive} className={'flex flex-col w-full px-3'}/>
+                ? <RoomMenu isRoomMenuActive={isRoomMenuActive} className={'flex flex-col w-full px-3'} setNewRoom={setNewRoom} onSubmit={onSubmit} errorMessage={errorMessage}/>
                 :
                 <>
                 <Button 

@@ -13,7 +13,7 @@ function App() {
     <>
         <Routes>
           <Route path='/' element={ <Landing setUsername={setUsername} setRoom={setRoom}/> }/>
-          <Route path='/chat' element={ <Chat username={usermame} room={room}/> }/>
+          <Route path='/chat' element={ <Chat username={usermame} currentRoom={room} setCurrentRoom={setRoom}/> }/>
         </Routes>
     </>
   )
