@@ -1,7 +1,6 @@
 import './MessageBubble.css'
 
 export default function MessageBubble({ message, username, key, type, sendTime }) {
-    console.log(type);
     let bubbleClass
     switch(type)
     {

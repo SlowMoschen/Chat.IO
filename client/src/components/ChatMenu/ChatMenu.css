@@ -1,0 +1,9 @@
+.chat-menu {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+@media only screen and (min-width: 768px) {
+    .chat-menu {
+        border-radius: 0 0 10px 0px;
+    }
+}
