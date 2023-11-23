@@ -4,21 +4,22 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import { renderMessages } from "../utils/renderMessages";
 import { getCurrentTime } from "../../lib/TimeFunctions";
-import { errorDuration } from "../../lib/constants";
+import { errorDuration, serverURL } from "../../lib/constants";
 import ChatMenu from "../components/ChatMenu/ChatMenu";
 import useError from "../hooks/useError";
+import useToggle from "../hooks/useToggle";
 
 export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
-    const socket = useSocket('http://localhost:3001')
-    const [ newRoom, setNewRoom ] = useState('')
-    const [ currentConnections, setCurrentConnections ] = useState([])
-    const [ message, setMessage ] = useState('')
-    const [ receivedMessages, setReceivedMessages ] = useState([])
-    const [ isMenuActive, setIsMenuActive ] = useState(false)
-    const [ isRoomMenuActive, setIsRoomMenuActive ] = useState(false)
-    const [ error, setError ] = useState(null)
+    const socket = useSocket(serverURL)
     const errorMessage = useError(error)
+    const [ error, setError ] = useState(null)
+    const [ newRoom, setNewRoom ] = useState('')
+    const [ message, setMessage ] = useState('')
+    const [ currentConnections, setCurrentConnections ] = useState([])
+    const [ receivedMessages, setReceivedMessages ] = useState([])
+    const [ isMenuActive, toggleMenu ] = useToggle(false)
+    const [ isRoomMenuActive, toggleRoomMenu ] = useToggle(false)
     const messageContainerRef = useRef()
     const shouldScrollRef = useRef(true)
     
@@ -27,6 +28,13 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
         setMessage('')
     }
 
+    const handleMenuClick = () => {
+        toggleMenu()
+        if(isRoomMenuActive)
+        {
+            toggleRoomMenu()
+        }
+    }
 
     const handleMessageSubmit = e => {
         e.preventDefault()
@@ -44,6 +52,8 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
         }
         socket.emit('join-new-room', newRoom)
         setCurrentRoom(newRoom)
+        toggleMenu()
+        toggleRoomMenu()
     }
     
     //Function to evaluate if user scrolled to the bottom of MessageContainer
@@ -89,10 +99,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                 <div className="h-full flex flex-col relative">
                     <div className="h-[10%] bg-primary flex items-center justify-center text-clear-white relative">
                         <div className="absolute left-5">
-                            <Button onClick={() => {
-                                setIsMenuActive(!isMenuActive)
-                                setIsRoomMenuActive(false)
-                                }}>
+                            <Button onClick={() => handleMenuClick()}>
                                 <span className="material-symbols-outlined text-3xl">{isMenuActive ? 'close' : 'menu'}</span>
                             </Button>
                         </div>
@@ -104,9 +111,9 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                     <ChatMenu 
                     className={'chat-menu absolute top-[10%] flex-col justify-center w-full h-32 z-10 md:w-60'} 
                     isMenuActive={isMenuActive} 
-                    setIsMenuActive={setIsMenuActive}
+                    toggleMenu={toggleMenu}
                     isRoomMenuActive={isRoomMenuActive}
-                    setIsRoomMenuActive={setIsRoomMenuActive}
+                    setIsRoomMenuActive={toggleRoomMenu}
                     setNewRoom={setNewRoom}
                     onSubmit={(e) => handleRoomSubmit(e)}
                     errorMessage={errorMessage}
