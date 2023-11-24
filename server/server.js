@@ -104,7 +104,7 @@ function joinRoom(roomName, socket, username)
         currentConnections.set(roomName, new Map())
     }
 
-    currentConnections.get(roomName).set(username, socket.id)
+    currentConnections.get(roomName).set(username.toLowerCase(), socket.id)
     sendUserState(roomName, username, '!user-joined!')
     updateUsersInRoom(roomName)
     console.log(`User ${username} joined room: ${roomName}`);

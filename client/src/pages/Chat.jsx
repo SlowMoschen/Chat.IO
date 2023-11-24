@@ -11,7 +11,7 @@ import useToggle from "../hooks/useToggle";
 import useScrollHandler from "../hooks/useScrollHandler";
 
 export default function Chat({ username, currentRoom, setCurrentRoom }) {
-
+    console.log(username);
     const socket = useSocket(serverURL)
     const [ error, setError ] = useState(null)
     const errorMessage = useError(error)
@@ -68,7 +68,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                 setCurrentConnections(connections.map(([username, userID]) => ({ username: username, id: userID })))
             })
             
-            socket.emit('join-room', currentRoom, username.toLowerCase())
+            socket.emit('join-room', currentRoom, username)
             
             socket.on('received-message', (data) => {
                 const { username, message, sendTime, room } = data
