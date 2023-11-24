@@ -8,9 +8,9 @@ export const renderMessages = (obj, index, username) => {
     // Check if Message is a Userstate Message
     const stateMessage =
         obj.message === '!user-joined!'
-            ? `${obj.username} joined the room`
+            ? `${obj.username} joined room: ${obj.room}`
             : obj.message === '!user-disconnected!'
-            ? `${obj.username} disconnected from the room`
+            ? `${obj.username} disconnected from room: ${obj.room}`
             : '';
 
     if (stateMessage !== '') {

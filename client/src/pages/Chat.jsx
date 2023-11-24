@@ -8,12 +8,13 @@ import { errorDuration, serverURL } from "../../lib/constants";
 import ChatMenu from "../components/ChatMenu/ChatMenu";
 import useError from "../hooks/useError";
 import useToggle from "../hooks/useToggle";
+import useScrollHandler from "../hooks/useScrollHandler";
 
 export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
     const socket = useSocket(serverURL)
-    const errorMessage = useError(error)
     const [ error, setError ] = useState(null)
+    const errorMessage = useError(error)
     const [ newRoom, setNewRoom ] = useState('')
     const [ message, setMessage ] = useState('')
     const [ currentConnections, setCurrentConnections ] = useState([])
@@ -56,12 +57,9 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
         toggleRoomMenu()
     }
     
-    //Function to evaluate if user scrolled to the bottom of MessageContainer
-    const handleScroll = () => {
-        shouldScrollRef.current = messageContainerRef.current.scrollTop === messageContainerRef.current.scrollHeight - messageContainerRef.current.clientHeight
-    }
+    //Hook to scroll always to bottom of MessageContainer unless user scrolls up
+    const handleScroll = useScrollHandler(messageContainerRef, shouldScrollRef, receivedMessages)
     
-
     //useEffects to fire before render
     useEffect(() => {
         if(socket)
@@ -70,22 +68,15 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                 setCurrentConnections(connections.map(([username, userID]) => ({ username: username, id: userID })))
             })
             
-            socket.emit('join-room', currentRoom, username)
+            socket.emit('join-room', currentRoom, username.toLowerCase())
             
             socket.on('received-message', (data) => {
-                const { username, message, sendTime } = data
-                setReceivedMessages((prevMessages) => [...prevMessages, {username: username, message: message, sendTime: sendTime}])
+                const { username, message, sendTime, room } = data
+                setReceivedMessages((prevMessages) => [...prevMessages, {username: username, message: message, sendTime: sendTime, room: room}])
             })
         }
         
     }, [socket])
-
-    useEffect(() => {
-        if(shouldScrollRef.current)
-        {
-            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight
-        }
-    }, [receivedMessages])
 
     useEffect(() => {
         setTimeout(() => {

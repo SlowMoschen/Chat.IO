@@ -15,7 +15,7 @@ export default function Landing({ setUsername, setRoom }) {
     const handleSubmit = async e => {
         e.preventDefault()
         const inputs = e.target.elements
-        const username = inputs.username.value.trim().toLowerCase()
+        const username = inputs.username.value.trim()
         const room = inputs.room.value !== '' ? inputs.room.value.trim().toLowerCase() : 'global'
         let usernameTaken
 
@@ -38,7 +38,7 @@ export default function Landing({ setUsername, setRoom }) {
                 console.error(error)
             }
         }
-        await checkUsername(username)
+        await checkUsername(username.toLowerCase())
 
         if(usernameTaken)
         {

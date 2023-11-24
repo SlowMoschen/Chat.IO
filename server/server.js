@@ -93,7 +93,7 @@ function whileConnected(socket)
     socket.on('send-message', (data) => {
         const { room, message, sendTime } = data
         const username = getUsername(socket)
-        io.to(room).emit('received-message', {username: username, message, sendTime: sendTime})
+        io.to(room).emit('received-message', {username: username, message, sendTime: sendTime, room: room})
     })
 
     // Event will be fired if a socket disconnects
@@ -156,11 +156,10 @@ function deleteUser(username, currentRoom)
 }
 
 function updateUsersInRoom(room) {
-    console.log(Array.from(currentConnections.get(room).entries()));
     io.to(room).emit('update-connections', Array.from(currentConnections.get(room).entries()))
 }
 
 function sendUserState(room, username, message)
 {
-    io.to(room).emit('received-message', {username: username, message})
+    io.to(room).emit('received-message', {username: username, message, room: room})
 }
