@@ -5,6 +5,7 @@ const app = express()
 const cors = require('cors')
 
 const { Server } = require('socket.io')
+const { fchown } = require('fs')
 const PORT = process.env.PORT
 const httpServer = createServer(app)
 httpServer.listen(PORT, () => console.log(`Server listening on Port http://localhost:${PORT}`))
@@ -54,55 +55,59 @@ function whileConnected(socket)
 {
     console.log(`${socket.id} connected`)
 
-    // Event for joining the first selected Room
-    socket.on('join-room', (roomName, username) =>{
-        socket.join(roomName)
+    socket.on('join-room', (roomName, username) => joinRoom(roomName, socket, username))
 
-        if(!currentConnections.has(roomName))
-        {
-            currentConnections.set(roomName, new Map())
-        }
-
-        currentConnections.get(roomName).set(username, socket.id)
-
-        console.log(`User ${username} joined room: ${roomName}`)
-        sendUserState(roomName, username, '!user-joined!')
-        updateUsersInRoom(roomName)
-    })
-
-    //Event for joining a new Room
-    socket.on('join-new-room', (newRoom) => {
-        const username = getUsername(socket)
-        const currentRoom = getCurrentRoom(username)
-        if(currentRoom !== newRoom)
-        {
-
-            if(!currentConnections.has(newRoom))
-            {
-                currentConnections.set(newRoom, new Map())
-            }
-            currentConnections.get(newRoom).set(username, socket.id)
-            socket.join(newRoom)
-            deleteUser(username, currentRoom)
-            sendUserState(newRoom, username, '!user-joined!')
-            updateUsersInRoom(newRoom)
-            console.log(`User ${username} joined room: ${newRoom}`);
-        }
-    })
+    socket.on('join-new-room', (newRoom) => joinRoom(newRoom, socket))
     
-    socket.on('send-message', (data) => {
-        const { room, message, sendTime } = data
-        const username = getUsername(socket)
-        io.to(room).emit('received-message', {username: username, message, sendTime: sendTime, room: room})
-    })
+    socket.on('send-message', (data) => sendMessage(socket, data))
 
-    // Event will be fired if a socket disconnects
-    socket.on('disconnect', () => {
-        console.log(`${socket.id} disconnected`)
-        const username = getUsername(socket)
-        deleteUser(username)
-    })
+    socket.on('disconnect', () => disconnect(socket))
 
+}
+
+// Socket Event Functions
+function disconnect(socket)
+{
+    console.log(`${socket.id} disconnected`)
+    const username = getUsername(socket)
+    deleteUser(username)
+}
+
+function sendMessage(socket, data)
+{
+    const { room, message, sendTime } = data
+    const username = getUsername(socket)
+    io.to(room).emit('received-message', {username: username, message, sendTime: sendTime, room: room})
+}
+
+function joinRoom(roomName, socket, username)
+{
+    if(!username)
+    {
+        username = getUsername(socket)
+    }
+    
+    const currentRoom = getCurrentRoom(username)
+
+    if(currentRoom && currentRoom !== roomName)
+    {
+
+        deleteUser(username, currentRoom)
+        updateUsersInRoom(currentRoom)
+        socket.leave(currentRoom)
+    }
+
+    socket.join(roomName)
+
+    if(!currentConnections.has(roomName))
+    {
+        currentConnections.set(roomName, new Map())
+    }
+
+    currentConnections.get(roomName).set(username, socket.id)
+    sendUserState(roomName, username, '!user-joined!')
+    updateUsersInRoom(roomName)
+    console.log(`User ${username} joined room: ${roomName}`);
 }
 
 // Helper functions

@@ -3,7 +3,7 @@ import MessageBubble from "../components/MessageBubble/MessageBubble"
 export const renderMessages = (obj, index, username) => {
     
     // Check if Message came from Sender
-    const messageType = obj.username === username ? 'sent' : 'received'
+    const messageType = obj.username === username.toLowerCase() ? 'sent' : 'received'
 
     // Check if Message is a Userstate Message
     const stateMessage =
