@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { createServer } = require('http')
+const { createServer, get } = require('http')
 const express = require('express')
 const app = express()
 const cors = require('cors')
@@ -50,6 +50,7 @@ const io = new Server(httpServer, {
 io.on('connection', whileConnected)
 
 let currentConnections = new Map()
+let typingUser = new Map()
 
 function whileConnected(socket)
 {
@@ -63,6 +64,9 @@ function whileConnected(socket)
 
     socket.on('disconnect', () => disconnect(socket))
 
+    socket.on('start-typing', () => startTyping(socket))
+
+    socket.on('stoped-typing', () => stopTyping(socket))
 }
 
 // Socket Event Functions
@@ -108,6 +112,27 @@ function joinRoom(roomName, socket, username)
     sendUserState(roomName, username, '!user-joined!')
     updateUsersInRoom(roomName)
     console.log(`User ${username} joined room: ${roomName}`);
+}
+
+function startTyping(socket)
+{
+    const username = getUsername(socket)
+    const currentRoom = getCurrentRoom(username)
+    
+    typingUser.set(socket.id, username)
+
+    socket.to(currentRoom).emit('user-started-typing', { username })
+
+}
+
+function stopTyping(socket)
+{
+    const username = getUsername(socket)
+    const currentRoom = getCurrentRoom(username)
+
+    typingUser.delete(socket.id)
+
+    socket.to(currentRoom).emit('user-stoped-typing', { username })
 }
 
 // Helper functions
