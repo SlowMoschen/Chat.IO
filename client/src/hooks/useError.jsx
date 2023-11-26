@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { errorDuration } from "../../lib/constants";
+import { timers } from "../../lib/constants";
 
 const useError = (error) => {
     const [ errorMessage, setErrorMessage ] = useState(null)
@@ -25,7 +25,7 @@ const useError = (error) => {
 
         const timer = setTimeout(() => {
             setErrorMessage(null)
-        }, errorDuration);
+        }, timers.errorDuration);
 
         return () => clearTimeout(timer)
     }, [error])

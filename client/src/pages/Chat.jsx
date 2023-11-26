@@ -4,14 +4,14 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import { renderMessages } from "../utils/renderMessages";
 import { getCurrentTime } from "../../lib/TimeFunctions";
-import { errorDuration, serverURL } from "../../lib/constants";
+import { timers, serverURL } from "../../lib/constants";
 import ChatMenu from "../components/ChatMenu/ChatMenu";
 import useError from "../hooks/useError";
 import useToggle from "../hooks/useToggle";
 import useScrollHandler from "../hooks/useScrollHandler";
 
 export default function Chat({ username, currentRoom, setCurrentRoom }) {
-    console.log(username);
+
     const socket = useSocket(serverURL)
     const [ error, setError ] = useState(null)
     const errorMessage = useError(error)
@@ -21,6 +21,8 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
     const [ receivedMessages, setReceivedMessages ] = useState([])
     const [ isMenuActive, toggleMenu ] = useToggle(false)
     const [ isRoomMenuActive, toggleRoomMenu ] = useToggle(false)
+    const [ isTyping, setIsTyping ] = useState(false)
+    const [ typingUser, setTypingUser ] = useState([])
     const messageContainerRef = useRef()
     const shouldScrollRef = useRef(true)
     
@@ -56,6 +58,25 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
         toggleMenu()
         toggleRoomMenu()
     }
+
+    const handleInputChange = e => {
+        setMessage(e.target.value)
+        setIsTyping(true)
+        
+        // Only emit once to server
+        if(!isTyping)
+        {
+            socket.emit('start-typing')
+        }
+
+        setTimeout(() => {
+            setIsTyping(false)
+            if(isTyping)
+            {
+                socket.emit('stoped-typing')
+            }
+        }, timers.isTypingDuration);
+    }
     
     //Hook to scroll always to bottom of MessageContainer unless user scrolls up
     const handleScroll = useScrollHandler(messageContainerRef, shouldScrollRef, receivedMessages)
@@ -74,14 +95,22 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                 const { username, message, sendTime, room } = data
                 setReceivedMessages((prevMessages) => [...prevMessages, {username: username, message: message, sendTime: sendTime, room: room}])
             })
-        }
-        
+
+            socket.on('user-started-typing', (username) => {
+                setTypingUser((prevUsers) => [...prevUsers, username])
+            })
+
+            socket.on('user-stoped-typing', (username) => {
+                setTypingUser(typingUser.filter(user => user !== username))
+            })
+        }        
     }, [socket])
+
 
     useEffect(() => {
         setTimeout(() => {
             setError(null)
-        }, errorDuration);
+        }, timers.errorDuration);
     }, [error])
 
     return (
@@ -94,9 +123,24 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                                 <span className="material-symbols-outlined text-3xl">{isMenuActive ? 'close' : 'menu'}</span>
                             </Button>
                         </div>
-                        <div>
-                            <h1 className="text-3xl">Room: <span className="capitalize">{currentRoom}</span></h1>
-                            <p className="text-xl">Currently Online: <span className="font-bold text-xl">{currentConnections.length}</span></p>
+                        <div className="text-center">
+                            <h1 className="text-2xl">Room: <span className="capitalize text-xl">{currentRoom}</span></h1>
+                            <p className="is-typing-display">
+                                {
+                                typingUser.length === 1 
+                                ? `${typingUser[0].username} is typing...` 
+                                : typingUser.length > 1
+                                ? `Multiple Users are typing...`
+                                : ''
+                                }
+                            </p>
+                        </div>
+                        <div className="absolute right-2 md:right-5 flex flex-col justify-end text-center">
+                            <div className="flex flex-col justify-center items-center">
+                                <span className="material-symbols-outlined h-7 text-3xl">groups</span>
+                                <div className="online-dot"></div>
+                            </div>
+                            <span className="font-bold text-lg">{currentConnections.length}</span>
                         </div>
                     </div>
                     <ChatMenu 
@@ -122,7 +166,14 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                     <div className="h-[3%] flex items-center justify-center w-full">
                         <form onSubmit={(e) => handleMessageSubmit(e)} className="flex w-full px-2">
                             <div className="w-[90%]">
-                                <Input placeholder={'Message'} name={'message'} id={'message'} onChange={(e) => setMessage(e.target.value)} type={'text'} autoComplete={'off'}/>
+                                <Input 
+                                placeholder={'Message'} 
+                                name={'message'} 
+                                id={'message'} 
+                                onChange={(e) => handleInputChange(e)} 
+                                onBlur={() => socket.emit('stoped-typing')} 
+                                type={'text'} autoComplete={'off'}
+                                />
                             </div>
                             <div className="w-[10%] flex items-center justify-center">
                                 <Button 

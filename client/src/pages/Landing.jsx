@@ -4,7 +4,7 @@ import Input from '../components/Input'
 import Button from '../components/Button'
 import { useEffect, useState } from "react"
 import useError from "../hooks/useError"
-import { errorDuration } from "../../lib/constants"
+import { timers } from "../../lib/constants"
 
 export default function Landing({ setUsername, setRoom }) {
 
@@ -62,7 +62,7 @@ export default function Landing({ setUsername, setRoom }) {
     useEffect(() => {
         setTimeout(() => {
             setError(null)
-        }, errorDuration);
+        }, timers.errorDuration);
     }, [error])
 
 
