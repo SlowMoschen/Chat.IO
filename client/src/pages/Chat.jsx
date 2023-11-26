@@ -9,6 +9,7 @@ import ChatMenu from "../components/ChatMenu/ChatMenu";
 import useError from "../hooks/useError";
 import useToggle from "../hooks/useToggle";
 import useScrollHandler from "../hooks/useScrollHandler";
+import RoomInfoMenu from "../components/RoomInfoMenu/RoomInfoMenu";
 
 export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
@@ -21,6 +22,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
     const [ receivedMessages, setReceivedMessages ] = useState([])
     const [ isMenuActive, toggleMenu ] = useToggle(false)
     const [ isRoomMenuActive, toggleRoomMenu ] = useToggle(false)
+    const [ isRoomInfoActive, toggleRoomInfo ] = useToggle(false)
     const [ isTyping, setIsTyping ] = useState(false)
     const [ typingUser, setTypingUser ] = useState([])
     const messageContainerRef = useRef()
@@ -146,7 +148,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
         <>
             <div className="h-[98%] lg:w-[50%] lg:border lg:my-2 rounded-md">
                 <div className="h-full flex flex-col relative">
-                    <div className="h-[10%] bg-primary flex items-center justify-center text-clear-white relative">
+                    <div className="h-[12%] bg-primary flex items-center justify-center text-clear-white relative">
                         <div className="absolute left-5">
                             <Button onClick={() => handleMenuClick()}>
                                 <span className="material-symbols-outlined text-3xl">{isMenuActive ? 'close' : 'menu'}</span>
@@ -167,13 +169,25 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                         <div className="absolute right-2 md:right-5 flex flex-col justify-end text-center">
                             <div className="flex flex-col justify-center items-center">
                                 <span className="material-symbols-outlined h-7 text-3xl">groups</span>
-                                <div className="online-dot"></div>
+                                <div className="flex items-center justify-center">
+                                    <span className="font-bold text-lg mr-2">{currentConnections.length}</span>
+                                    <div className="online-dot"></div>
+                                </div>
                             </div>
-                            <span className="font-bold text-lg">{currentConnections.length}</span>
+                            <div className="cursor-pointer">
+                                <Button onClick={() => toggleRoomInfo()}>
+                                    <span className="material-symbols-outlined">info</span>
+                                </Button>
+                            </div>
                         </div>
                     </div>
+                    <RoomInfoMenu
+                    className={'room-info absolute top-[12%] text-clear-white right-0 flex-col items-center justify-center w-full h-fit min-h-[6rem] z-10 md:w-52'}
+                    isRoomInfoActive={isRoomInfoActive}
+                    currentConnections={currentConnections}
+                    />
                     <ChatMenu 
-                    className={'chat-menu absolute top-[10%] flex-col justify-center w-full h-32 z-10 md:w-96'} 
+                    className={'chat-menu absolute top-[12%] bg-accent flex-col justify-center w-full h-32 z-10 md:w-96'} 
                     isMenuActive={isMenuActive} 
                     toggleMenu={toggleMenu}
                     isRoomMenuActive={isRoomMenuActive}
@@ -183,7 +197,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                     errorMessage={errorMessage}
                     />
                     <div className="h-[85%]">
-                        <ul className="messages-display h-full flex flex-col overflow-y-scroll max-h-[100%]" ref={messageContainerRef} onScroll={() => handleScroll()}>
+                        <ul className="messages-display h-full flex flex-col overflow-y-scroll max-h-[100%] pb-2" ref={messageContainerRef} onScroll={() => handleScroll()}>
                             {
                                 receivedMessages.map((obj, index) => {
                                     const { key, content } = renderMessages(obj, index, username);

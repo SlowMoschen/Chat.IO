@@ -1,0 +1,9 @@
+.room-info {
+    background-color: #4681b4;
+}
+
+@media only screen and (min-width: 768px) {
+    .room-info{
+        border-radius: 0 0px 0px 10px;
+    }
+}
