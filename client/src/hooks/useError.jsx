@@ -18,6 +18,9 @@ const useError = (error) => {
                 case 'equal':
                     setErrorMessage('Already joined')
                     break
+                case 'exist':
+                    setErrorMessage('Username exists in Room')
+                    break
                 default:
                     setErrorMessage('An error occurred')
             }

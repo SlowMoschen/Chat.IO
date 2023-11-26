@@ -4,7 +4,7 @@ import Input from '../components/Input'
 import Button from '../components/Button'
 import { useEffect, useState } from "react"
 import useError from "../hooks/useError"
-import { timers } from "../../lib/constants"
+import { serverURL, timers } from "../../lib/constants"
 
 export default function Landing({ setUsername, setRoom }) {
 
@@ -22,7 +22,7 @@ export default function Landing({ setUsername, setRoom }) {
         const checkUsername = async (username) => {
             try
             {
-                const response = await fetch('http://localhost:3001', {
+                const response = await fetch(serverURL, {
                     method: 'POST',
                 credentials: 'include',
                 headers: {

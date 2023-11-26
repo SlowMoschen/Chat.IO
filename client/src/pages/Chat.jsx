@@ -45,12 +45,41 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
         e.target.elements.message.value = ''
     }
 
-    const handleRoomSubmit = e => {
+    const handleRoomSubmit = async e => {
         e.preventDefault()
+        let isTaken
+        
         if(newRoom === currentRoom) 
         {
             setError('equal')
             e.target.elements.newroom.value = ''
+            return
+        }
+
+        const checkForUsername = async () => {
+            try
+            {
+                const response = await fetch(serverURL, {
+                    method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({username: username, room: newRoom})
+                })
+                const data = await response.json()
+                isTaken = data
+            }
+            catch (error)
+            {
+                console.error(error)
+            }
+        }
+        await checkForUsername()
+        
+        if(isTaken)
+        {
+            setError('exist')
             return
         }
         socket.emit('join-new-room', newRoom)
@@ -144,7 +173,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                         </div>
                     </div>
                     <ChatMenu 
-                    className={'chat-menu absolute top-[10%] flex-col justify-center w-full h-32 z-10 md:w-60'} 
+                    className={'chat-menu absolute top-[10%] flex-col justify-center w-full h-32 z-10 md:w-96'} 
                     isMenuActive={isMenuActive} 
                     toggleMenu={toggleMenu}
                     isRoomMenuActive={isRoomMenuActive}

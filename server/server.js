@@ -5,6 +5,7 @@ const app = express()
 const cors = require('cors')
 
 const { Server } = require('socket.io')
+const { fchown } = require('fs')
 const PORT = process.env.PORT
 const httpServer = createServer(app)
 httpServer.listen(PORT, () => console.log(`Server listening on Port http://localhost:${PORT}`))
@@ -55,9 +56,9 @@ function whileConnected(socket)
 {
     console.log(`${socket.id} connected`)
 
-    socket.on('join-room', (roomName, username) => joinRoom(roomName, socket, username))
+    socket.on('join-room', (roomName, username) => joinRoom('new', roomName, socket, username))
 
-    socket.on('join-new-room', (newRoom) => joinRoom(newRoom, socket))
+    socket.on('join-new-room', (newRoom) => joinRoom( 'exist', newRoom, socket))
     
     socket.on('send-message', (data) => sendMessage(socket, data))
 
@@ -83,31 +84,33 @@ function sendMessage(socket, data)
     io.to(room).emit('received-message', {username: username, message, sendTime: sendTime, room: room})
 }
 
-function joinRoom(roomName, socket, username)
+function joinRoom(userType, roomName, socket, username)
 {
     if(!username)
     {
         username = getUsername(socket)
     }
+    const currentRoom = getCurrentRoom(socket)
     
-    const currentRoom = getCurrentRoom(username)
-
-    if(currentRoom && currentRoom !== roomName)
+    if(currentRoom && currentRoom !== roomName && userType !== 'new')
     {
-
+        
         deleteUser(username, currentRoom)
         updateUsersInRoom(currentRoom)
         socket.leave(currentRoom)
     }
-
+    
     socket.join(roomName)
-
+    
     if(!currentConnections.has(roomName))
     {
         currentConnections.set(roomName, new Map())
+        typingUser.set(roomName, new Map())
+        console.log(typingUser);
     }
-
+    
     currentConnections.get(roomName).set(username.toLowerCase(), socket.id)
+    console.log(currentConnections);
     sendUserState(roomName, username, '!user-joined!')
     updateUsersInRoom(roomName)
     console.log(`User ${username} joined room: ${roomName}`);
@@ -116,9 +119,9 @@ function joinRoom(roomName, socket, username)
 function startTyping(socket)
 {
     const username = getUsername(socket)
-    const currentRoom = getCurrentRoom(username)
+    const currentRoom = getCurrentRoom(socket)
     
-    typingUser.set(socket.id, username)
+    typingUser.get(currentRoom).set(socket.id, username)
 
     socket.to(currentRoom).emit('user-started-typing', { username })
 
@@ -127,9 +130,9 @@ function startTyping(socket)
 function stopTyping(socket)
 {
     const username = getUsername(socket)
-    const currentRoom = getCurrentRoom(username)
+    const currentRoom = getCurrentRoom(socket)
 
-    typingUser.delete(socket.id)
+    typingUser.get(currentRoom).delete(socket.id)
 
     socket.to(currentRoom).emit('user-stoped-typing', { username })
 }
@@ -149,13 +152,16 @@ function getUsername(socket)
     return output
 }
 
-function getCurrentRoom(username)
+function getCurrentRoom(socket)
 {
-    for(const [room, users] of currentConnections.entries())
+    for(const room of currentConnections.entries())
     {
-        if(users.has(username))
+        for(const users of room[1].entries())
         {
-            return room
+            if(users[1] === socket.id)
+            {
+                return room[0]
+            }
         }
     }
 }
