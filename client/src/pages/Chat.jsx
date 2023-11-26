@@ -171,7 +171,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                                 name={'message'} 
                                 id={'message'} 
                                 onChange={(e) => handleInputChange(e)} 
-                                onBlur={() => socket.emit('stoped-typing')} 
+                                onBlur={() => socket.emit('stoped-typing')}
                                 type={'text'} autoComplete={'off'}
                                 />
                             </div>

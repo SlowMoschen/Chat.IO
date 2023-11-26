@@ -5,7 +5,6 @@ const app = express()
 const cors = require('cors')
 
 const { Server } = require('socket.io')
-const { fchown } = require('fs')
 const PORT = process.env.PORT
 const httpServer = createServer(app)
 httpServer.listen(PORT, () => console.log(`Server listening on Port http://localhost:${PORT}`))
@@ -90,8 +89,6 @@ function joinRoom(roomName, socket, username)
     {
         username = getUsername(socket)
     }
-
-    username = username.toLowerCase()
     
     const currentRoom = getCurrentRoom(username)
 
@@ -110,7 +107,7 @@ function joinRoom(roomName, socket, username)
         currentConnections.set(roomName, new Map())
     }
 
-    currentConnections.get(roomName).set(username, socket.id)
+    currentConnections.get(roomName).set(username.toLowerCase(), socket.id)
     sendUserState(roomName, username, '!user-joined!')
     updateUsersInRoom(roomName)
     console.log(`User ${username} joined room: ${roomName}`);
