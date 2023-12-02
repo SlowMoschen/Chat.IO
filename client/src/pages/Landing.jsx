@@ -4,7 +4,8 @@ import Input from '../components/Input'
 import Button from '../components/Button'
 import { useEffect, useState } from "react"
 import useError from "../hooks/useError"
-import { serverURL, timers } from "../../lib/constants"
+import { timers } from "../utils/constants"
+import { checkUsername } from "../utils/usernameFetch"
 
 export default function Landing({ setUsername, setRoom }) {
 
@@ -17,28 +18,14 @@ export default function Landing({ setUsername, setRoom }) {
         const inputs = e.target.elements
         const username = inputs.username.value.trim()
         const room = inputs.room.value !== '' ? inputs.room.value.trim().toLowerCase() : 'global'
-        let usernameTaken
 
-        const checkUsername = async (username) => {
-            try
-            {
-                const response = await fetch(serverURL, {
-                    method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({username: username, room: room})
-                })
-                const data = await response.json()
-                usernameTaken = data
-            }
-            catch (error)
-            {
-                console.error(error)
-            }
+        const body = {
+            username: username,
+            room: room
         }
-        await checkUsername(username.toLowerCase())
+        let usernameTaken = await checkUsername(body)
+
+        console.log(usernameTaken);
 
         if(usernameTaken)
         {

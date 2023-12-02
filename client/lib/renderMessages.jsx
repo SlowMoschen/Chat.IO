@@ -1,4 +1,4 @@
-import MessageBubble from "../components/MessageBubble/MessageBubble"
+import MessageBubble from "../src/components/MessageBubble/MessageBubble"
 
 export const renderMessages = (obj, index, username) => {
     

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { timers } from "../../lib/constants";
+import { timers } from "../utils/constants";
 
 const useError = (error) => {
     const [ errorMessage, setErrorMessage ] = useState(null)

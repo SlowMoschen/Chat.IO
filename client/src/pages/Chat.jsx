@@ -2,14 +2,15 @@ import React, { useEffect, useState, useRef } from "react";
 import useSocket from "../hooks/useSocket"
 import Input from "../components/Input";
 import Button from "../components/Button";
-import { renderMessages } from "../utils/renderMessages";
-import { getCurrentTime } from "../../lib/TimeFunctions";
-import { timers, serverURL } from "../../lib/constants";
+import { renderMessages } from "../../lib/renderMessages";
+import { getCurrentTime } from "../utils/TimeFunctions";
+import { timers, serverURL } from "../utils/constants";
 import ChatMenu from "../components/ChatMenu/ChatMenu";
 import useError from "../hooks/useError";
 import useToggle from "../hooks/useToggle";
 import useScrollHandler from "../hooks/useScrollHandler";
 import RoomInfoMenu from "../components/RoomInfoMenu/RoomInfoMenu";
+import { checkUsername } from "../utils/usernameFetch";
 
 export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
@@ -49,7 +50,6 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
     const handleRoomSubmit = async e => {
         e.preventDefault()
-        let isTaken
         
         if(newRoom === currentRoom) 
         {
@@ -58,28 +58,14 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
             return
         }
 
-        const checkForUsername = async () => {
-            try
-            {
-                const response = await fetch(serverURL, {
-                    method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({username: username, room: newRoom})
-                })
-                const data = await response.json()
-                isTaken = data
-            }
-            catch (error)
-            {
-                console.error(error)
-            }
+        const body = {
+            username: username,
+            room: newRoom
         }
-        await checkForUsername()
+
+        const usernameTaken = await checkUsername(body)
         
-        if(isTaken)
+        if(usernameTaken)
         {
             setError('exist')
             return
