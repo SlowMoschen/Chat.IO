@@ -1,9 +1,33 @@
 import MessageBubble from "../src/components/MessageBubble/MessageBubble"
 
-export const renderMessages = (obj, index, username) => {
+export const renderMessages = (obj, index, username, toggleNextMessageDM, setDirectMessageTo) => {
     
     // Check if Message came from Sender
-    const messageType = obj.username === username.toLowerCase() ? 'sent' : 'received'
+    let messageType
+    if(obj.dm === true)
+    {
+        if(obj.username === username.toLowerCase())
+        {
+            messageType = 'sent dm'
+        }
+        else
+        {
+            messageType = 'received dm'
+        }
+
+    }
+    else
+    {
+        if(obj.username === username.toLowerCase())
+        {
+            messageType = 'sent'
+        }
+        else {
+            messageType = 'received'
+        }
+
+    }
+    // const messageType1 = obj.username === username.toLowerCase() ? 'sent' : obj.username !== username.toLowerCase() && obj.dm === true ? 'received dm' : 'received'
 
     // Check if Message is a Userstate Message
     const stateMessage =
@@ -25,6 +49,8 @@ export const renderMessages = (obj, index, username) => {
                     username={obj.username}
                     type={messageType}
                     sendTime={obj.sendTime}
+                    toggleNextMessageDM={toggleNextMessageDM}
+                    setDirectMessageTo={setDirectMessageTo}
                 />
             ),
         }

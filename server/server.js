@@ -61,6 +61,8 @@ function whileConnected(socket)
     socket.on('join-new-room', (newRoom) => joinRoom( 'exist', newRoom, socket))
     
     socket.on('send-message', (data) => sendMessage(socket, data))
+    
+    socket.on('send-direct-message', (data) => sendDirectMessage(socket, data))
 
     socket.on('disconnect', () => disconnect(socket))
 
@@ -81,7 +83,19 @@ function sendMessage(socket, data)
 {
     const { room, message, sendTime } = data
     const username = getUsername(socket)
-    io.to(room).emit('received-message', {username: username, message, sendTime: sendTime, room: room})
+    io.to(room).emit('received-message', {username: username, message, sendTime: sendTime, room: room, dm: false})
+}
+
+function sendDirectMessage(socket, data)
+{
+    const { reciever, message, sendTime, room } = data
+    
+    const senderUsername = getUsername(socket)
+    const recieverSocketID = getSocketID(reciever, room)
+    const senderSocketID = getSocketID(senderUsername, room)
+
+    io.to(senderSocketID).emit('recieved-direct-message', {sender: senderUsername, message, sendTime: sendTime, dm: true})
+    io.to(recieverSocketID).emit('recieved-direct-message', {sender: senderUsername, message, sendTime: sendTime, dm: true})
 }
 
 function joinRoom(userType, roomName, socket, username)
@@ -150,6 +164,11 @@ function getUsername(socket)
         })
     })
     return output
+}
+
+function getSocketID(username, room)
+{
+    return currentConnections.get(room).get(username)
 }
 
 function getCurrentRoom(socket)

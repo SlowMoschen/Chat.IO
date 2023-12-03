@@ -36,7 +36,9 @@
 
 .sender {
     font-size: 18px;
-    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    /* text-transform: capitalize; */
     margin: .2rem 0;
 }
 

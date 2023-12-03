@@ -20,12 +20,10 @@ export default function Landing({ setUsername, setRoom }) {
         const room = inputs.room.value !== '' ? inputs.room.value.trim().toLowerCase() : 'global'
 
         const body = {
-            username: username,
+            username: username.toLowerCase(),
             room: room
         }
         let usernameTaken = await checkUsername(body)
-
-        console.log(usernameTaken);
 
         if(usernameTaken)
         {

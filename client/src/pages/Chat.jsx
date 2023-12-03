@@ -24,6 +24,8 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
     const [ isMenuActive, toggleMenu ] = useToggle(false)
     const [ isRoomMenuActive, toggleRoomMenu ] = useToggle(false)
     const [ isRoomInfoActive, toggleRoomInfo ] = useToggle(false)
+    const [ isNextMessageDM, toggleNextMessageDM ] = useToggle(false)
+    const [ directMessageTo, setDirectMessageTo ] = useState('')
     const [ isTyping, setIsTyping ] = useState(false)
     const [ typingUser, setTypingUser ] = useState([])
     const messageContainerRef = useRef()
@@ -31,6 +33,11 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
     
     const sendMessage = () => {
         socket.emit('send-message', { room: currentRoom, message, sendTime: getCurrentTime() })
+        setMessage('')
+    }
+    
+    const sendDirectMessage = () => {
+        socket.emit('send-direct-message', { reciever: directMessageTo, message, sendTime: getCurrentTime(), room: currentRoom })
         setMessage('')
     }
 
@@ -44,7 +51,17 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
     const handleMessageSubmit = e => {
         e.preventDefault()
-        sendMessage()
+
+        if(isNextMessageDM)
+        {
+            sendDirectMessage()
+            toggleNextMessageDM()
+        }
+        else
+        {
+            sendMessage()
+        }
+
         e.target.elements.message.value = ''
     }
 
@@ -59,7 +76,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
         }
 
         const body = {
-            username: username,
+            username: username.toLowerCase(),
             room: newRoom
         }
 
@@ -109,8 +126,8 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
             socket.emit('join-room', currentRoom, username)
             
             socket.on('received-message', (data) => {
-                const { username, message, sendTime, room } = data
-                setReceivedMessages((prevMessages) => [...prevMessages, {username: username, message: message, sendTime: sendTime, room: room}])
+                const { username, message, sendTime, room, dm } = data
+                setReceivedMessages((prevMessages) => [...prevMessages, {username: username, message: message, sendTime: sendTime, room: room, dm: dm}])
             })
 
             socket.on('user-started-typing', (username) => {
@@ -119,6 +136,11 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
 
             socket.on('user-stoped-typing', (username) => {
                 setTypingUser(typingUser.filter(user => user !== username))
+            })
+
+            socket.on('recieved-direct-message', (data) => {
+                const { sender, message, sendTime, room, dm } = data
+                setReceivedMessages((prevMessages) => [...prevMessages, {username: sender, message: message, sendTime: sendTime, room: room, dm: dm}])
             })
         }        
     }, [socket])
@@ -186,15 +208,25 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                         <ul className="messages-display h-full flex flex-col overflow-y-scroll max-h-[100%] pb-2" ref={messageContainerRef} onScroll={() => handleScroll()}>
                             {
                                 receivedMessages.map((obj, index) => {
-                                    const { key, content } = renderMessages(obj, index, username);
+                                    const { key, content } = renderMessages(obj, index, username, toggleNextMessageDM, setDirectMessageTo);
                                     return React.cloneElement(content, { key });
                                 })
                             }
                         </ul>
                     </div>
                     <div className="h-[3%] flex items-center justify-center w-full">
+                        {
+                            isNextMessageDM 
+                            ?   <div className="absolute bg-grey-bg w-full h-32 z-0">
+                                    <div className="absolute top-2 left-2">Direct Message to: {directMessageTo}</div>
+                                    <div className="absolute right-2 top-2 cursor-pointer" onClick={() => toggleNextMessageDM()}>
+                                        <span className="material-symbols-outlined">close</span>
+                                    </div>
+                                </div>
+                            : ''
+                        }
                         <form onSubmit={(e) => handleMessageSubmit(e)} className="flex w-full px-2">
-                            <div className="w-[90%]">
+                            <div className="w-[90%] z-10">
                                 <Input 
                                 placeholder={'Message'} 
                                 name={'message'} 
@@ -204,7 +236,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                                 type={'text'} autoComplete={'off'}
                                 />
                             </div>
-                            <div className="w-[10%] flex items-center justify-center">
+                            <div className="w-[10%] flex items-center justify-center z-10">
                                 <Button 
                                 className={`ml-2 h-10 w-16 md:w-20 xl:w-32 rounded-md bg-primary outline-accent text-clear-white flex items-center justify-center ${message ? 'cursor-pointer' : 'cursor-not-allowed'}`} 
                                 disabled={message ? false : true}
