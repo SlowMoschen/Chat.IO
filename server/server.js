@@ -120,11 +120,9 @@ function joinRoom(userType, roomName, socket, username)
     {
         currentConnections.set(roomName, new Map())
         typingUser.set(roomName, new Map())
-        console.log(typingUser);
     }
     
     currentConnections.get(roomName).set(username.toLowerCase(), socket.id)
-    console.log(currentConnections);
     sendUserState(roomName, username, '!user-joined!')
     updateUsersInRoom(roomName)
     console.log(`User ${username} joined room: ${roomName}`);

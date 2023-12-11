@@ -204,7 +204,7 @@ export default function Chat({ username, currentRoom, setCurrentRoom }) {
                     onSubmit={(e) => handleRoomSubmit(e)}
                     errorMessage={errorMessage}
                     />
-                    <div className="h-[85%]">
+                    <div className="h-[85%] lg:h-[83%]">
                         <ul className="messages-display h-full flex flex-col overflow-y-scroll max-h-[100%] pb-2" ref={messageContainerRef} onScroll={() => handleScroll()}>
                             {
                                 receivedMessages.map((obj, index) => {
