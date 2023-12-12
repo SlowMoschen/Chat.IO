@@ -6,6 +6,14 @@
   <img src="https://github.com/SlowMoschen/Chat.IO/blob/main/images/chat.PNG" alt="Chatpage" width="45%">
 </p>
 
+## About
+Originally, the development of this application aimed to learn websockets using the Node.js library Socket.IO. However, as is often the case with projects, I ended up learning much more than I initially intended. In the first three days of working on the project, I found myself in despair as I reconsidered everything and took an overly complicated approach. Consequently, I decided to reset the entire project and focus entirely on the MVP (Most Valuable Product).
+
+After getting the first functional version up and running, enabling message exchange between different browser windows, I created two new Git branches – one for new features and one for refactoring the existing code. Working with Git branches was a new experience for me up to that point.
+
+Once the basic design of the app was completed, I began thinking about new features. This led to the implementation of features such as direct messages, displaying currently logged-in users, and the ability to switch between different chat rooms.
+
+The learning experiences from this project were significant. In addition to deepening my knowledge of working with websockets and the Socket.IO library, I also gained valuable skills in project management. Resetting the project and focusing on the MVP taught me the importance of clear goals and priorities. Utilizing Git branches provided an efficient way for organizing and developing features. Overall, Chat.IO was not just a technology learning project but also a training ground for effective development practices and decision-making.
 
 ## Tech Stack:
 
