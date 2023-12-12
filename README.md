@@ -29,6 +29,10 @@ The learning experiences from this project were significant. In addition to deep
 - Set and join a private room or the global chat
 - Display user join and disconnect messages
 - Usernames in a room are unique
+- Joining a new Room while Logged in
+- Send direct messages to another user in a Room
+- Displays currently writting user
+- Displays Users in a room
 
 ## Prerequisites
 - Code Editor
